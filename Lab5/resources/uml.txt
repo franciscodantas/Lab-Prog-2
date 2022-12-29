@@ -1,0 +1,253 @@
+LunrApp
+association DocumentoController
+association BuscaController
+association SimilaridadeController
+---
+- documentoController: DocumentoController
+- buscaController: BuscaController
+- similaridadeController: SimilaridadeController
+---
++ LunrApp()
++ getDocumentoController(): DocumentoController
++ getBuscaController(): BuscaController
++ getSimilaridadeController(): SimilaridadeController
+---
+
+DocumentoController
+association DocumentoService
+association ValidadorDocumentos
+association DocumentoDTO
+association DocumentoJava
+association DocumentoHtml
+association DocumentoTexto
+---
+- ds: DocumentoService
+---
++ DocumentoController(ds: DocumentoService)
++ adicionaDocumentoTxt(id: str, txt: str): void
++ adicionaDocumentoHtml(id: str, html: str): void
++ adicionaDocumentoJava(id: str, java: str): void
++ adicionaDocumento(d: Documento): void
++ recuperarDocumento(id: str): Optional<DocumentoDTO>
++ totalDocumentos(): int
++ recuperaMetricaTextoUtil(id: str): double
++ concatenaDocumentos(id1: str, id2: str): str
++  sumariza(id: str): srt[]
+---
+
+DocumentoService
+association DocumentoRepository
+---
+- dr: DocumentoRepository
+---
++ DocumentoService()
++ adicionaDocumento(d: Documento): void
++ recuperarDocumento(id: str): Optional<DocumentoDTO>
+- recuperaDocumentoOuFalhe(id: str): Documento
++ totalDocumentos(): int
++ recuperaMetricaTextoUtil(id: str): double
++ concatena(id1: str, id2: str): str
++ sumariza(id: str): srt[]
++ busca(termo: str): Set<Documento>
+---
+
+DocumentoRepository
+composes Documento<<Interface>>
+association ValidadorDocumentos
+---
+- documentos: Map<str, Documento>
+- validador: ValidadorDocumentos
+---
++ DocumentoRepository()
++ adiciona(d: Documento): void
++ recupera(id: str): Optional<Documento>
++ totalDocumentos(): int
++ busca(termo: str): Set<Documento>
+---
+
+Documento<<Interface>>
+---
+---
++ metricaTextoUtil(): double
++ getId(): str
++ getTexto(): str[]
++ getMetadados(): Map<str, str>
+---
+
+DocumentoHtml
+implements Documento<<Interface>>
+---
+- id: str
+- original: str
+- limpo: str
+- metadados: Map<str, str>
+- split: str[]
+---
++ DocumentoHtml(id: str, original: str)
++ metricaTextoUtil(): double
++ getId(): str
++ getTexto(): str[]
++ getMetadados(): Map<str, str>
++ hashCode(): int
++ equals(o: Object): bool
++ toString(): str
+- extractHead(original2: str): Map<str, str>
+---
+
+
+DocumentoJava
+implements Documento<<Interface>>
+---
+- id: str
+- original: str
+- limpo: str
+- metadados: Map<str, str>
+- split: str[]
+---
++ DocumentoJava(id: str, original: str)
++ metricaTextoUtil(): double
++ getId(): str
++ getTexto(): str[]
++ getMetadados(): Map<str, str>
++ hashCode(): int
++ equals(o: Object): bool
++ toString(): str
+- extractData(original2: str): Map<str, str>
+---
+
+
+DocumentoDTO
+---
+- id: str
+- metadados: Map<str, str>
+- texto: str[]
+- saida: str
+- metricaTextoUtil: double
+---
++ DocumentoDTO(id: str, original: str)
++ metricaTextoUtil(): double
++ getId(): str
++ getTexto(): str[]
++ getMetadados(): Map<str, str>
++ hashCode(): int
++ equals(o: Object): bool
++ toString(): str
+---
+
+DocumentoTexto
+implements Documento<<Interface>>
+---
+- id: str
+- original: str
+- limpo: str
+- metadados: Map<str, str>
+- split: str[]
+---
++ DocumentoTexto(id: str, original: str)
++ metricaTextoUtil(): double
++ getId(): str
++ getTexto(): str[]
++ getMetadados(): Map<str, str>
++ hashCode(): int
++ equals(o: Object): bool
++ toString(): str
+---
+
+ValidadorDocumentos
+extends ValidadorPadrao
+---
+---
++ validacao(id: str, conteudo: str): void
++ validacao(id: str, texto: str[]): void
+---
+
+ValidadorBusca
+extends ValidadorPadrao
+---
+---
++ validacao(numero: int): void
++ validacao(termos: str[]): void
+---
+
+ValidadorPadrao
+---
+---
++ validacao(id: str): void
+---
+
+BuscaController
+association BuscaService
+association ValidadorBusca
+association BuscaSimples
+---
+- bs: BuscaService
+- bv: ValidadorBusca
+---
++ BuscaController(bs: BuscaService)
++ busca(termos: str[]): DocumentoDTO[]
++ busca(metadados: Map<str, str>): DocumentoDTO[]
++ recuperaHistoricoDepuracao(numero: int): str[][]
++ recuperaHistoricoIds(numero: int): str[]
+---
+
+BuscaService
+association BuscaRepository
+association DocumentoService
+---
+- br: BuscaRepository
+- ds: DocumentoService
+---
++ BuscaService(ds: DocumentoService)
++ busca(bs: BuscaSimples): DocumentoDTO[]
++ recuperaHistorico(numero: int): HistoricoBusca
+---
+
+BuscaRepository
+association ValidadorBusca
+composes HistoricoBusca
+---
+- buscas: List<HistoricoBusca>
+- validador: ValidadorBusca
+---
++ BuscaRepository()
++ adicionaBusca(bs: BuscaSimples, documentos: DocumentoDTO[]): void
++ recuperar(numero: int): HistoricoBusca
+---
+
+HistoricoBusca
+---
+- busca: BuscaSimples
+- documentosIds: str[]
+---
++ HistoricoBusca(busca: BuscaSimples, documentosIds: str[])
++ debug(): str[][]
++ ids(): str[]
+---
+
+BuscaSimples
+association DocumentoService
+---
+- termos: str[]
+---
++ BuscaSimples(termos: str[])
++ busca(ds: DocumentoService): Map<Documento, str>
++ descreveConsulta(): str[][]
+---
+
+SimilaridadeController
+association SimilaridadeService
+---
+- similaridadeService: SimilaridadeService
+---
++ SimilaridadeController(ss: similaridadeService)
++ similaridade(doc1: str, doc2: str): double
+---
+
+SimilaridadeService
+association DocumentoService
+---
+- documentoService: DocumentoService
+---
++ SimilaridadeService(ds: documentoService)
++ similaridade(doc1: str, doc2: str): double
+---
